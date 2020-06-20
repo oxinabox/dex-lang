@@ -121,3 +121,4 @@ Which it indeed does.
 
 :p pso 50 1000 rosenbrock2 ([-10.0, -10.0],[20.0, 20.0])
 > [1.0, 1.0]
+
