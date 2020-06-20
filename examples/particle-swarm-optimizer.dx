@@ -50,20 +50,20 @@ We have **arguments**:
  - type explicit, `np:Ix`: number of particles
  - type explicit, `niter:Ix`: number of iterations
  - type: `d:Ix`: number of dimensions in the domain of `f`, i.e. the search space.
+ - `(momentum,gRate,pRate):(Real,Real,Real)`: PSO hyper-parameters to control exploration vs exploitation.
  - `f:(d=>Real)->Real`: loss function being minimized.
  - `(lb,ub):(d=>Real,d=>Real)`: boundries of the space being searched
- - `(momentum,gRate,pRate):(Real,Real,Real)`: PSO hyper-parameters to control exploration vs exploitation.
 
 ' **Returns**: the optimal point found with-in the bounds on the input domain of `f`.
 
-def optimize
+def particle_swarm_optimize
       (d:Type) ?->
+      (key:Key)                                        -- random seed
+      ((momentum, gRate, pRate):(Real & Real & Real))  -- momentum/pRate/gRate
       (np':Int)                                        -- number of particles
       (niter:Int)                                      -- number of iterations
-      (key:Key)                                        -- random seed
       (f:(d=>Real)->Real)                              -- function to optimize
       ((lb,ub):(d=>Real & d=>Real))                    -- bounds
-      ((momentum, gRate, pRate):(Real & Real & Real))  -- momentum/pRate/gRate
       : (d=>Real) =
     np = Fin np'
     optStep = \(keyL, gbest, pbests, positions, velocities).
@@ -99,19 +99,25 @@ def optimize
     (dc0,(finalGscore, finalGloc),dc1,dc2,dc3) = res
     finalGloc
 
+
+' convenience function, with hard-coded key, and hyperparams
+
+pso : Int -> Int -> ((d=>Real)->Real) -> (d=>Real & d=>Real) -> (d=>Real) =
+    particle_swarm_optimize (newKey 0) (0.5, 0.3, 0.4)
+
 ' ---
 Lets see how it goes.
 Run it for more iterations and result should improve.
 Which it indeed does.
 
-:p optimize 50 10 (newKey 0) rosenbrock2 ([-10.0, -10.0],[20.0, 20.0]) (0.5,0.3,0.4)
+:p pso 50 10 rosenbrock2 ([-10.0, -10.0],[20.0, 20.0])
 > [3.7902775, 14.911414]
 
-:p optimize 50 20 (newKey 0) rosenbrock2 ([-10.0, -10.0],[20.0, 20.0]) (0.5,0.3,0.4)
+:p pso 50 20 rosenbrock2 ([-10.0, -10.0],[20.0, 20.0])
 > [1.737736, 3.1227164]
 
-:p optimize 50 100 (newKey 0) rosenbrock2 ([-10.0, -10.0],[20.0, 20.0]) (0.5,0.3,0.4)
+:p pso 50 100 rosenbrock2 ([-10.0, -10.0],[20.0, 20.0])
 > [1.0062338, 1.0128839]
 
-:p optimize 50 1000 (newKey 0) rosenbrock2 ([-10.0, -10.0],[20.0, 20.0]) (0.5,0.3,0.4)
+:p pso 50 1000 rosenbrock2 ([-10.0, -10.0],[20.0, 20.0])
 > [1.0, 1.0]
